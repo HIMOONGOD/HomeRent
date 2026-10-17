@@ -11,8 +11,12 @@ const router = createRouter({
     {
       path: '/explore',
       name: 'explore',
-      component: () => import('../components/PlaceholderPage.vue'),
-      props: { title: 'Explore Map & Homes' },
+      component: () => import('../components/ExplorePage.vue'),
+    },
+    {
+      path: '/properties/:id',
+      name: 'property-detail',
+      component: () => import('../components/PropertyDetailPage.vue'),
     },
     {
       path: '/tenant',
@@ -23,8 +27,13 @@ const router = createRouter({
     {
       path: '/landlord',
       name: 'landlord',
-      component: () => import('../components/PlaceholderPage.vue'),
+      component: () => import('../components/LandLord.vue'),
       props: { title: 'Landlord Portal' },
+    },{
+      path: '/add-property',
+      name: 'add-property',
+      component: () => import('../components/AddProperty.vue'),
+      props: { title: 'Add Property' },
     },
     {
       path: '/saved',
