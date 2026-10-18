@@ -14,6 +14,18 @@ const router = createRouter({
       component: () => import('../components/ExplorePage.vue'),
     },
     {
+      path: '/login',
+      name: 'login',
+      component: () => import('../components/AuthPage.vue'),
+      props: { mode: 'login' },
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: () => import('../components/AuthPage.vue'),
+      props: { mode: 'register' },
+    },
+    {
       path: '/properties/:id',
       name: 'property-detail',
       component: () => import('../components/PropertyDetailPage.vue'),

@@ -2,15 +2,17 @@
 
 
 
-import { RouterView } from 'vue-router';
+import { RouterView, useRoute } from 'vue-router';
 import Nav from './components/Nav.vue';
+
+const route = useRoute();
 
 </script>
 
 <template>
     <div>
         <nav>
-            <Nav/>
+            <Nav v-if="route.name !== 'login' && route.name !== 'register'" />
         </nav>
          <RouterView />
     </div>

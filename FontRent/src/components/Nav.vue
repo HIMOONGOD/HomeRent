@@ -15,7 +15,6 @@ const currentUser = {
     name: 'Guest',
     role: 'guest',
 }
-const showAuthModal = ref(false)
 
 function closeMobileMenu() {
     isMobileMenuOpen.value = false
@@ -100,7 +99,7 @@ function closeMobileMenu() {
                         {{ t('listYourHouse') }}
                     </RouterLink>
 
-                    <button type="button" @click="showAuthModal = true"
+                    <RouterLink to="/login"
                         class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-slate-300 bg-slate-50 text-sm font-medium text-slate-700 transition">
                         <span
                             class="w-7 h-7 rounded-full bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">{{
@@ -109,7 +108,7 @@ function closeMobileMenu() {
                         <span
                             class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold uppercase">{{
                             t('guestRole') }}</span>
-                    </button>
+                    </RouterLink>
                 </div>
 
                 <div class="flex lg:hidden items-center gap-1">
@@ -179,7 +178,7 @@ function closeMobileMenu() {
                                 </svg>
                                 {{ t('listYourHouse') }}
                             </RouterLink>
-                            <button type="button" @click="showAuthModal = true; isMobileMenuOpen = false"
+                            <RouterLink to="/login" @click="closeMobileMenu"
                                 class="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 transition">
                                 <span class="w-7 h-7 rounded-full bg-emerald-700 text-white text-xs font-bold flex items-center justify-center">
                                     {{ currentUser.initials }}
@@ -188,7 +187,7 @@ function closeMobileMenu() {
                                 <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold uppercase">
                                     {{ t('guestRole') }}
                                 </span>
-                            </button>
+                            </RouterLink>
                         </div>
                     </div>
                 </Transition>
