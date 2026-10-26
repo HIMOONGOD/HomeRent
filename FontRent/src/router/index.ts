@@ -42,6 +42,10 @@ const router = createRouter({
       component: () => import('../components/LandLord.vue'),
       props: { title: 'Landlord Portal' },
     },{
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../components/AdminPage.vue'),
+    },{
       path: '/add-property',
       name: 'add-property',
       component: () => import('../components/AddProperty.vue'),
@@ -56,8 +60,7 @@ const router = createRouter({
     {
       path: '/create',
       name: 'create',
-      component: () => import('../components/PlaceholderPage.vue'),
-      props: { title: 'List Your House' },
+      redirect: '/add-property',
     },
   ],
 })

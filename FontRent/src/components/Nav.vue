@@ -2,9 +2,11 @@
 import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useLanguage } from '../composables/useLanguage'
+import { usePointsBalance } from '../composables/usePointsBalance'
 
 const route = useRoute()
 const { language, t, toggleLanguage } = useLanguage()
+const { pointsBalance } = usePointsBalance()
 const currentPage = computed(() => route.name)
 const bookings = ref([])
 const pendingBookingsCount = ref(0)
@@ -54,14 +56,7 @@ function closeMobileMenu() {
                     <RouterLink to="/explore" :aria-current="currentPage === 'explore' ? 'page' : undefined"
                         :class="currentPage === 'explore' ? 'text-emerald-600 bg-emerald-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
                         class="px-3.5 py-2 rounded-lg text-sm transition">{{ t('explore') }}</RouterLink>
-                    <RouterLink to="/tenant" :aria-current="currentPage === 'tenant' ? 'page' : undefined"
-                        :class="currentPage === 'tenant' ? 'text-emerald-600 bg-emerald-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
-                        class="px-3.5 py-2 rounded-lg text-sm transition flex items-center gap-1.5">
-                        {{ t('tenantHub') }}
-                        <span v-if="bookings.length"
-                            class="px-1.5 py-0.2 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">{{
-                            bookings.length }}</span>
-                    </RouterLink>
+                  
                     <RouterLink to="/landlord" :aria-current="currentPage === 'landlord' ? 'page' : undefined"
                         :class="currentPage === 'landlord' ? 'text-emerald-600 bg-emerald-50 font-semibold' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'"
                         class="px-3.5 py-2 rounded-lg text-sm transition flex items-center gap-1.5">
@@ -91,7 +86,7 @@ function closeMobileMenu() {
                             favoriteIds.length }}</span>
                     </RouterLink>
 
-                    <RouterLink to="/create"
+                    <RouterLink to="/add-property"
                         class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -109,9 +104,15 @@ function closeMobileMenu() {
                             class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold uppercase">{{
                             t('guestRole') }}</span>
                     </RouterLink>
+                    <span class="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800" :aria-label="`${pointsBalance} ${t('addPropertyPoints')} remaining`" :title="`${pointsBalance} ${t('addPropertyPoints')} remaining`">
+                        <span aria-hidden="true">✦</span>{{ pointsBalance }} {{ t('addPropertyPoints') }}
+                    </span>
                 </div>
 
                 <div class="flex lg:hidden items-center gap-1">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1.5 text-[11px] font-semibold text-amber-800" :aria-label="`${pointsBalance} ${t('addPropertyPoints')} remaining`" :title="`${pointsBalance} ${t('addPropertyPoints')} remaining`">
+                        <span aria-hidden="true">✦</span>{{ pointsBalance }}
+                    </span>
                     <RouterLink to="/saved"
                         class="relative p-2 text-slate-600 hover:text-emerald-600 hover:bg-slate-100 rounded-lg transition"
                         :title="t('savedHomes')" :aria-label="t('savedHomes')">
@@ -155,13 +156,7 @@ function closeMobileMenu() {
                             <RouterLink to="/explore" @click="closeMobileMenu"
                                 :class="currentPage === 'explore' ? 'text-emerald-700 bg-emerald-50 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
                                 class="w-full text-left px-3 py-2.5 rounded-lg text-sm transition">{{ t('explore') }}</RouterLink>
-                            <RouterLink to="/tenant" @click="closeMobileMenu"
-                                :class="currentPage === 'tenant' ? 'text-emerald-700 bg-emerald-50 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
-                                class="w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition">
-                                {{ t('tenantHub') }}
-                                <span v-if="bookings.length"
-                                    class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">{{ bookings.length }}</span>
-                            </RouterLink>
+                           
                             <RouterLink to="/landlord" @click="closeMobileMenu"
                                 :class="currentPage === 'landlord' ? 'text-emerald-700 bg-emerald-50 font-semibold' : 'text-slate-700 hover:bg-slate-50'"
                                 class="w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition">
@@ -171,7 +166,7 @@ function closeMobileMenu() {
                             </RouterLink>
                         </nav>
                         <div class="mt-3 border-t border-slate-100 pt-3 flex flex-col gap-2">
-                            <RouterLink to="/create" @click="closeMobileMenu"
+                            <RouterLink to="/add-property" @click="closeMobileMenu"
                                 class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold shadow-sm transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

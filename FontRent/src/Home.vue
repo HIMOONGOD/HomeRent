@@ -12,7 +12,7 @@ const route = useRoute();
 <template>
     <div>
         <nav>
-            <Nav v-if="route.name !== 'login' && route.name !== 'register'" />
+            <Nav v-if="route.name !== 'login' && route.name !== 'register' && route.name !== 'admin'" />
         </nav>
          <RouterView />
     </div>

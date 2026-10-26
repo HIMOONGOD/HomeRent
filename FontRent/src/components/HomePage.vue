@@ -7,13 +7,18 @@ import { properties, type LeaseType } from '../data/properties'
 type LeaseFilter = 'all' | LeaseType
 const { t } = useLanguage()
 
-const categories = computed(() => [
-  { label: t('allHomes'), value: 'all', icon: '⌂' },
-  { label: t('villas'), value: 'Villa', icon: '⌂' },
-  { label: t('penthouses'), value: 'Penthouse', icon: '▤' },
-  { label: t('familyHouses'), value: 'Family House', icon: '⌂' },
-  { label: t('studioLofts'), value: 'Studio Loft', icon: '▧' },
-])
+const categories = computed(() => {
+ const featured = [
+  { label: t('allHomes'), value: 'all', icon: '\u2302' },
+  { label: t('detachedHouse'), value: 'Detached house', icon: '\u2302' },
+  { label: t('dormitory'), value: 'Dormitory', icon: '\u2302' },
+  { label: t('apartment'), value: 'Apartment', icon: '\u2302' },
+    { label: t('shopUnit'), value: 'Shop unit', icon: '\u2302' },
+ ]
+ const known = new Set(featured.map((category) => category.value))
+ const extra = [...new Set(properties.map((property) => property.category))].filter((category) => !known.has(category)).map((category) => ({ label: category, value: category, icon: '\u2302' }))
+ return [...featured, ...extra]
+})
 
 const leaseOptions = computed(() => [
   { label: t('allRentals'), value: 'all' },
@@ -22,14 +27,9 @@ const leaseOptions = computed(() => [
 ])
 
 function displayCategory(category: string) {
-  const keyByCategory: Record<string, 'modernVilla' | 'penthouseCondo' | 'familyHouse' | 'studioLoft'> = {
-    Villa: 'modernVilla',
-    Penthouse: 'penthouseCondo',
-    'Family House': 'familyHouse',
-    'Studio Loft': 'studioLoft',
-  }
-  const key = keyByCategory[category]
-  return key ? t(key) : category
+  const labels: Record<string, 'detachedHouse' | 'dormitory' | 'apartment' | 'shopUnit'> = { 'Detached house': 'detachedHouse', Dormitory: 'dormitory', Apartment: 'apartment', 'Shop unit': 'shopUnit' }
+ const key = labels[category]
+ return key ? t(key) : category
 }
 
 const filters = ref({
@@ -37,14 +37,17 @@ const filters = ref({
   city: 'all',
   category: 'all',
   minBedrooms: 0,
-  maxPrice: 10000,
+  maxPrice: 1000000000000,
 })
 const favoriteIds = ref<number[]>([])
+const cities = computed(() => [...new Set(properties.map((property) => property.city).filter(Boolean))].sort())
 
 const filteredProperties = computed(() =>
   properties.filter((property) => {
     return (
+      property.purpose !== 'For Sale' &&
       (filters.value.leaseType === 'all' || property.leaseType === filters.value.leaseType) &&
+      (!property.listingExpiresAt || new Date(property.listingExpiresAt).getTime() > Date.now()) &&
       (filters.value.city === 'all' || property.city === filters.value.city) &&
       (filters.value.category === 'all' || property.category === filters.value.category) &&
       property.bedrooms >= filters.value.minBedrooms &&
@@ -59,7 +62,7 @@ const hasActiveFilters = computed(
     filters.value.city !== 'all' ||
     filters.value.category !== 'all' ||
     filters.value.minBedrooms > 0 ||
-    filters.value.maxPrice < 10000,
+    filters.value.maxPrice < 1000000000000,
 )
 
 function toggleFavorite(id: number) {
@@ -74,7 +77,7 @@ function resetFilters() {
     city: 'all',
     category: 'all',
     minBedrooms: 0,
-    maxPrice: 10000,
+    maxPrice: 1000000000000,
   }
 }
 </script>
@@ -138,10 +141,7 @@ function resetFilters() {
                 class="mt-1 w-full bg-transparent text-sm font-semibold text-slate-800 focus:outline-none"
               >
                 <option value="all">{{ t('allCities') }}</option>
-                <option>Yangon</option>
-                <option>Mandalay</option>
-                <option>Chiang Mai</option>
-                <option>Singapore</option>
+                <option v-for="cityOption in cities" :key="cityOption" :value="cityOption">{{ cityOption }}</option>
               </select>
             </label>
             <label class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
@@ -176,7 +176,7 @@ function resetFilters() {
                 v-model.number="filters.maxPrice"
                 class="mt-1 w-full bg-transparent text-sm font-semibold text-slate-800 focus:outline-none"
               >
-                <option :value="10000">{{ t('noLimit') }}</option>
+                <option :value="1000000000000">{{ t('noLimit') }}</option>
                 <option :value="1000">{{ t('upTo1000') }}</option>
                 <option :value="2000">{{ t('upTo2000') }}</option>
                 <option :value="3500">{{ t('upTo3500') }}</option>
@@ -357,10 +357,10 @@ function resetFilters() {
             <div class="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
               <div>
                 <span class="font-display text-xl font-extrabold text-slate-900">
-                  ${{ property.monthlyPrice.toLocaleString() }}
+                  {{ property.currency === 'MMK' ? 'MMK' : '$' }}{{ property.monthlyPrice.toLocaleString() }}
                 </span>
                 <span class="text-xs text-slate-500">{{ t('perMonth') }}</span>
-                <span class="mt-0.5 block text-[11px] text-slate-400">${{ property.nightlyPrice }}{{ t('perNight') }}</span>
+                <span v-if="property.nightlyPrice > 0" class="mt-0.5 block text-[11px] text-slate-400">{{ property.currency === 'MMK' ? 'MMK' : '$' }}{{ property.nightlyPrice }}{{ t('perNight') }}</span>
               </div>
               <RouterLink
                 :to="`/properties/${property.id}`"
@@ -409,7 +409,7 @@ function resetFilters() {
           <p class="mt-2 max-w-xl text-sm leading-6 text-emerald-100/80">{{ t('landlordCallout') }}</p>
         </div>
         <RouterLink
-          to="/create"
+          to="/add-property"
           class="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-50"
         >
           {{ t('listYourHouse') }}
