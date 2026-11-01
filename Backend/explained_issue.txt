@@ -1,0 +1,65 @@
+Laravel + MongoDB + Sanctum: What was wrong and what needed to be fixed
+
+1. The main problem
+The project was configured to use MongoDB as the database, but the Sanctum token model was pointing to a class that does not exist:
+
+MongoDB\Laravel\Sanctum\PersonalAccessToken
+
+This class is not available in the installed package version, so Laravel crashed when it tried to use it.
+
+2. Why you got the error
+The app was trying to create a personal access token for the user using Sanctum, but Sanctum was configured to use the wrong model class.
+
+That caused errors like:
+- Class "MongoDB\Laravel\Sanctum\PersonalAccessToken" not found
+- Call to a member function prepare() on null
+
+The second error happens because Laravel was eventually trying to insert token data using the standard SQL database layer instead of MongoDB-compatible models.
+
+3. What was wrong in the setup
+The app used:
+- MongoDB connection
+- User model with MongoDB connection
+- Sanctum to generate API tokens
+
+But the token model was not implemented in a MongoDB-compatible way.
+
+In other words:
+- User model = MongoDB-aware
+- Sanctum token model = not MongoDB-aware and pointing to a nonexistent class
+
+This mismatch caused the application to break when calling createToken().
+
+4. What needed to be fixed
+The correct fix was to:
+
+- Create a custom PersonalAccessToken model
+- Extend Laravel Sanctum's PersonalAccessToken model
+- Add MongoDB's DocumentModel trait so it works like a MongoDB document model
+- Set the connection to mongodb
+- Set the collection to personal_access_tokens
+- Register that model in config/sanctum.php
+- Register it again in AppServiceProvider.php if needed
+
+5. Correct idea
+The proper setup is:
+
+- User model uses MongoDB connection
+- PersonalAccessToken model uses MongoDB connection as well
+- Sanctum points to your custom token model
+
+This makes token creation work correctly with MongoDB.
+
+6. Extra note
+This environment also has a missing PHP extension: mbstring.
+This does not cause the main MongoDB/Sanctum bug, but it can prevent full Laravel artisan/test commands from running in this machine.
+
+7. Final conclusion
+You were not completely wrong; the project was close to being correct.
+The real mistake was the Sanctum token model configuration and MongoDB compatibility mismatch.
+
+The root cause was:
+- wrong class reference for the token model
+- no MongoDB-compatible token model implementation
+
+Once those were fixed, token creation with Laravel Sanctum on MongoDB worked correctly.

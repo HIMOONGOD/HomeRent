@@ -7,6 +7,8 @@ use Laravel\Sanctum\Sanctum;
 
 return [
 
+    'model' => App\Models\PersonalAccessToken::class,
+
     /*
     |--------------------------------------------------------------------------
     | Stateful Domains
