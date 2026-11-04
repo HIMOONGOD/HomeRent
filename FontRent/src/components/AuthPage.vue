@@ -12,7 +12,6 @@ const fullName = ref('')
 const showPassword = ref(false)
 const acceptedTerms = ref(false)
 const notice = ref('')
-
 function submitForm() {
   notice.value = isRegister.value
     ? `Thanks${fullName.value ? `, ${fullName.value.split(' ')[0]}` : ''}! Account creation is ready to connect to an authentication service.`

@@ -173,11 +173,11 @@ async function submitProperty() {
 
     try {
         publishProperty(property)
+        spendPoints(requiredPoints.value)
     } catch {
         errorMessage.value = 'Could not save this listing in browser storage. Try fewer or smaller photos.'
         return
     }
-    spendPoints(requiredPoints.value)
     showSuccess.value = true
 
     // Reset the form after the mock submission.
