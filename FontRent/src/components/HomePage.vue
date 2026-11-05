@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref ,onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useLanguage } from '../composables/useLanguage'
 import { properties, type LeaseType } from '../data/properties'
@@ -80,6 +80,27 @@ function resetFilters() {
     maxPrice: 1000000000000,
   }
 }
+
+// api test
+import type { User } from '../type/api'
+import { test } from '../services/userservices'
+const user = ref<User | null>(null);
+
+const loadUser = async () => {
+  try {
+    const userData = await test();
+    user.value = userData;
+
+    console.log("User data fetched successfully:", user.value);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
+}
+
+onMounted(() => {
+  loadUser();
+});
+
 </script>
 
 <template>
