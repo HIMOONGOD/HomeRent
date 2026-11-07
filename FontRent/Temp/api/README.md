@@ -1,5 +1,7 @@
 # API integration
 
+For the full backend contract—including endpoint requirements, payload examples, authorization, validation, and MongoDB guidance—see [API_REQUIREMENTS.md](./API_REQUIREMENTS.md).
+
 Set `VITE_API_BASE_URL` in a local `.env` file to enable API mode. Copy `.env.example` and set the URL for the backend. When it is blank, the current browser-local demo remains active.
 
 The frontend currently expects this REST contract:

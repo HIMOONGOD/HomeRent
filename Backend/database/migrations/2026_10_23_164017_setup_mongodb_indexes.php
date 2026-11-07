@@ -16,6 +16,7 @@ return new class extends Migration
             $collection->index('username');
             $collection->index('role');
             $collection->index('status');
+            $collection->index('point');
         });
 
         Schema::create('properties', function (Blueprint $collection) {

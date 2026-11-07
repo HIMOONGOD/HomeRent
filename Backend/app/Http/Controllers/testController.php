@@ -13,6 +13,6 @@ class testController extends Controller
 
         $user = User::first();
 
-        return response()->json($user);
+        return response()->json($user->properties()->get());
     }
 }
