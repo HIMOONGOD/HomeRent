@@ -2,56 +2,87 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request) {
-
-
-
-        $this->validator($request);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'pointsBalance' => 0,
-            'status' => 'active',
-            'role' => "user",
-            'password' => Hash::make($request->password)
-        ]);
-
-       $token = $user->createToken('my-app-token')->plainTextToken;
-
-        return response()->json(['token' => $token, 'user' => $user]);
-    }
-
-    public function validator($data) {
-        $data->validate([
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-        ]);
-
-    }
-
-    public function login(Request $request)
+    public function register(Request $request): JsonResponse
     {
-        $user = User::where('email', $request->email)->first();
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:120'],
+            'email' => ['required', 'string', 'email:rfc', 'max:254'],
+            'password' => ['required', 'string', 'min:8', 'max:128'],
+        ]);
 
+        $email = strtolower(trim($validated['email']));
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Email သို့မဟုတ် Password မှားနေပါသည်'], 401);
+        if (User::query()->where('email', $email)->exists()) {
+            return response()->json(['message' => 'An account with this email already exists.', 'code' => 'EMAIL_ALREADY_EXISTS'], 409);
         }
 
+        $user = User::create([
+            'name' => trim($validated['name']),
+            'email' => $email,
+            'password' => $validated['password'],
+            'pointsBalance' => 0,
+            'status' => 'active',
+            'role' => 'renter',
+        ]);
 
-        $token = $user->createToken('my-app-token')->plainTextToken;
-
-        return response()->json(['token' => $token, 'user' => $user]);
+        return $this->tokenResponse($user, 201);
     }
 
+    public function login(Request $request): JsonResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'string', 'email:rfc', 'max:254'],
+            'password' => ['required', 'string', 'max:128'],
+        ]);
 
+        $user = User::where('email', strtolower(trim($credentials['email'])))->first();
+
+        if (! $user || ($user->status ?? 'active') !== 'active' || ! Hash::check($credentials['password'], $user->password)) {
+            return response()->json([
+                'message' => 'The provided credentials are invalid.',
+                'code' => 'INVALID_CREDENTIALS',
+            ], 401);
+        }
+
+        return $this->tokenResponse($user);
+    }
+
+    public function me(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        return response()->json([
+            'user' => $this->userData($user),
+            'pointsBalance' => (int) ($user->pointsBalance ?? 0),
+        ]);
+    }
+
+    private function tokenResponse(User $user, int $status = 200): JsonResponse
+    {
+        $token = $user->createToken('fontrent-access-token')->plainTextToken;
+
+        return response()->json([
+            'accessToken' => $token,
+            'user' => $this->userData($user),
+        ], $status);
+    }
+
+    /** @return array{id: string, name: string, email: string, role: string} */
+    private function userData(User $user): array
+    {
+        return [
+            'id' => (string) $user->getKey(),
+            'name' => (string) $user->name,
+            'email' => (string) $user->email,
+            'role' => $user->role === 'user' ? 'renter' : (string) $user->role,
+        ];
+    }
 }
